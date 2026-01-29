@@ -7,7 +7,7 @@ import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
 import JoinCreateChat from "./JoinCreateChat";
 import axios from "axios";
-import { timeAgo } from "../config/helper";
+import { timeAgo } from "../config/Helper";
 import chatIcon from "../assets/chat.png";
 
 const ChatWindow = () => {
