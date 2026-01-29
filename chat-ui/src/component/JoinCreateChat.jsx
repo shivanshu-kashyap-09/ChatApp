@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import chatIcon from "../assets/chat.png"
 import toast from "react-hot-toast";
-import useChatContext from "../context/ChatContext";
+import useChatContext from "../Context/ChatContext";
 import { useNavigate } from "react-router";
 import axios from "axios";
 
