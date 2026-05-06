@@ -15,14 +15,16 @@ import lombok.Setter;
 public class MessageEntity {
 
 	private String id;
-	
 	private String sender;
-	
 	private String content;
-	
 	private LocalDateTime sendTime;
 	
-	private MessageEntity(String sender , String content) {
+    // File attachment fields
+    private String fileUrl;
+    private String fileName;
+    private String fileType;
+
+	public MessageEntity(String sender, String content) {
 		this.sender = sender;
 		this.content = content;
 		this.sendTime = LocalDateTime.now();

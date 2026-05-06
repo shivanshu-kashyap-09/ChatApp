@@ -37,6 +37,9 @@ public class ChatService {
             messageEntity.setSender(request.getSender());
             messageEntity.setContent(request.getContent());
             messageEntity.setSendTime(LocalDateTime.now());
+            messageEntity.setFileUrl(request.getFileUrl());
+            messageEntity.setFileName(request.getFileName());
+            messageEntity.setFileType(request.getFileType());
             
             if (room.getMessage() != null) {
                 room.getMessage().add(messageEntity);

@@ -1,145 +1,95 @@
 import React, { useState } from "react";
-import chatIcon from "../assets/chat.png"
 import toast from "react-hot-toast";
-import useChatContext from "../Context/ChatContext";
-import { useNavigate } from "react-router";
 import axios from "axios";
+import { Hash, Plus, Users, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import API_BASE_URL from "../config";
 
+const JoinCreateChat = ({ closeModal }) => {
+  const [roomName, setRoomName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const userName = localStorage.getItem("loginUserName");
 
-const JoinCreateChat = () => {
-  const loginUserName = localStorage.getItem("loginUserName");
-  const [detail, setDetail] = useState({
-    roomId: "",
-    userName: loginUserName,
-  });
-
-  const { roomId, userName, setRoomId, setCurrentUser, setConnected } =
-    useChatContext();
-  const navigate = useNavigate();
-
-  const handleFromInputChange = (e) =>{
-    const {name , value} = e.target;
-    setDetail({...detail , [name]:value});
-  }
-  const joinChat = async () => {
-    if (!detail.roomId || !detail.userName) {
-      toast.error("Room ID and Username cannot be empty!");
+  const handleAction = async (type) => {
+    if (!roomName.trim()) {
+      toast.error("Please enter a room name");
       return;
     }
-  
+    
+    setLoading(true);
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/chat-room/join-room/${loginUserName}`,
+      const endpoint = type === 'create' ? 'create-room' : 'join-room';
+      const response = await axios.post(`${API_BASE_URL}/chat-room/${endpoint}/${userName}`, {
+        roomId: roomName,
+      });
 
-        { roomId: detail.roomId }
-      );
-  
-      console.log(response.data);
-  
-      if (response.status === 200 && response.data === "Joined") {
-        toast.success("joined the room.");
-        setCurrentUser(detail.userName);
-        setRoomId(detail.roomId);
-        setConnected(true);
-        setIsModalOpen(false);
-        navigate("/");
-      } else if (response.status === 200 && response.data === "Already exist") {
-        toast.error("You already joined.");
-        navigate("/");
-      } else if (response.status === 404 && response.data === "Room not exist") {
-        toast.error("room does not exist.");
+      if (response.status === 200) {
+        toast.success(type === 'create' ? "Room created!" : "Joined room!");
+        closeModal();
+        window.location.reload(); // Refresh to show new room
       }
     } catch (error) {
-      console.error(error);
-      // toast.error("An error occurred while joining the room.");
-    }
-  };
-  
-
-  const createRoom = async () => {
-    if (!detail.roomId || !detail.userName) {
-      toast.error("Room ID and Username cannot be empty!");
-      return;
-    }
-  
-    try {
-      const response = await axios.post(`${API_BASE_URL}/chat-room/create-room/${loginUserName}`, {
-        roomId: detail.roomId,
-        userName: detail.userName, 
-      });
-      toast.success("Room created successfully!");
-      setCurrentUser(detail.userName);
-      setRoomId(detail.roomId); 
-      setConnected(true);
-      setIsModalOpen(false);
-      navigate("/ChatWindow");
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        toast.error(error.response.data || "Room already exists!");
-      } 
-      console.error(error);
+      toast.error(error.response?.data || `${type === 'create' ? 'Creation' : 'Joining'} failed`);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="p-6 sm:p-10 dark:border-gray-700 border w-full flex flex-col gap-5 max-w-md rounded-2xl dark:bg-gray-900 shadow-2xl">
-
-        <div>
-          <img src={chatIcon} className="w-24 mx-auto" />
+    <div className="bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-indigo-600/20 rounded-2xl flex items-center justify-center text-indigo-400">
+            <Users size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">New Conversation</h2>
+            <p className="text-sm text-slate-400">Start a new chat or join an existing one</p>
+          </div>
         </div>
 
-        <h1 className="text-2xl font-semibold text-center ">
-          Join Room / Create Room ..
-        </h1>
-        {/* name div */}
-        <div className="">
-          <label htmlFor="name" className="block font-medium mb-2">
-            Your name
-          </label>
-          <input
-            onChange={handleFromInputChange}
-            value={detail.userName}
-            type="text"
-            id="name"
-            name="userName"
-            placeholder="Enter the name"
-            className="w-full dark:bg-gray-600 px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Room ID / Name</label>
+            <div className="relative group">
+              <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
+              <input 
+                type="text" 
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value)}
+                placeholder="e.g. project-awesome"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              />
+            </div>
+          </div>
 
-        {/* room id div */}
-        <div className="">
-          <label htmlFor="name" className="block font-medium mb-2">
-            Room ID / New Room ID
-          </label>
-          <input
-            name="roomId"
-            onChange={handleFromInputChange}
-            value={detail.roomId}
-            type="text"
-            id="name"
-            placeholder="Enter the room id"
-            className="w-full dark:bg-gray-600 px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleAction('create')}
+              disabled={loading}
+              className="py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+            >
+              <Plus size={18} /> Create
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleAction('join')}
+              disabled={loading}
+              className="py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all border border-white/5 flex items-center justify-center gap-2"
+            >
+              Join <ArrowRight size={18} />
+            </motion.button>
+          </div>
         </div>
-
-        {/* button  */}
-        <div className="flex justify-center gap-2 mt-4">
-          <button
-            onClick={joinChat}
-            className="px-3 py-2 dark:bg-blue-500 hover:dark:bg-blue-800 rounded-full"
-          >
-            Join Room
-          </button>
-          <button
-            onClick={createRoom}
-            className="px-3 py-2 dark:bg-orange-500 hover:dark:bg-orange-800 rounded-full"
-          >
-            Create Room
-          </button>
-        </div>
+      </div>
+      
+      <div className="bg-indigo-600/5 p-4 text-center">
+        <p className="text-[10px] text-indigo-400/60 uppercase tracking-widest font-bold">
+          End-to-end encrypted
+        </p>
       </div>
     </div>
   );

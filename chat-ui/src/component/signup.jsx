@@ -1,165 +1,142 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
+import { User, Mail, Lock, UserPlus, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import API_BASE_URL from "../config";
 
-import toast from "react-hot-toast";
-import chatIcon from "../assets/chat.png";
-
 const Signup = () => {
-  const [userName, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState({
+    userName: "",
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleGenerateOtp = async () => {
-    if (!email) {
-      toast.error("Please enter your email to generate OTP.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${API_BASE_URL}/user/generate-otp`, { email});
-      if (response.status === 200) {
-        setIsOtpSent(true);
-        toast.success("OTP sent to your email. Please check and verify.");
-      }
-    } catch (error) {
-      console.error("Error sending OTP:", error.response?.data || error.message);
-      toast.error(error.response?.data || "Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleInput = (e) => {
+    setUserData({
+      ...userData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleVerifyOtp = async () => {
-    if (!otp) {
-      toast.success("Please enter the OTP to verify.");
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (!userData.userName || !userData.email || !userData.password) {
+      toast.error("Please fill all fields");
       return;
     }
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/user/verify`, { email, otp });
-      if (response.status === 200) {
-        setIsVerified(true);
-        toast.success("Email verified successfully!");
-      } else {
-        toast.error("Incorrect OTP. Please try again.");
+      const response = await axios.post(`${API_BASE_URL}/signup`, userData);
+      if (response.data) {
+        toast.success("Account created! Please login.");
+        navigate("/login");
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error.response?.data || error.message);
-      toast.error(error.response?.data || "Failed to verify OTP. Please try again.");
+      toast.error(error.response?.data || "Signup failed");
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async () => {
-    if (!userName || !email || !password) {
-      toast.error("Please fill all the fields before signing up.");
-      return;
-    }
-    if (!isVerified) {
-      toast.error("Please verify your email before signing up.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${API_BASE_URL}/user/signup`, {
-        userName,
-        email,
-        password,
-      });
-      if (response.status === 200) {
-        toast.success("Signup successful.");
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("loginEmail", email);
-        localStorage.setItem("loginUserName", userName);
-        navigate("/");
-      }
-    } catch (error) {
-      console.error("Error signing up:", error.response?.data || error.message);
-      toast.error(error.response?.data || "Failed to sign up. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
-      <div className="p-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 overflow-hidden relative font-sans">
+      {/* Background Orbs */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] -translate-x-1/2 translate-y-1/2"></div>
 
-        <img src={chatIcon} className="w-14 mx-auto mb-[10px]" />
-
-        <input
-          type="text"
-          value={userName}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="w-full p-2 border rounded mb-4"
-          style={{ color: "black" }}
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="w-full p-2 border rounded mb-4"
-          style={{ color: "black" }}
-        />
-        {!isOtpSent ? (
-          <button
-            onClick={handleGenerateOtp}
-            className="px-4 py-2 bg-blue-600 text-white rounded w-full"
-            disabled={isLoading}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md z-10"
+      >
+        <div className="text-center mb-8">
+          <motion.div 
+            initial={{ rotate: -12 }}
+            animate={{ rotate: 0 }}
+            className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl shadow-indigo-600/20"
           >
-            {isLoading ? "Sending OTP..." : "Send OTP"}
-          </button>
-        ) : (
-          <>
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              className="w-full p-2 border rounded mb-4"
-              style={{ color: "black" }}
-            />
-            <button
-              onClick={handleVerifyOtp}
-              className={`px-4 py-2 rounded w-full ${isVerified ? "bg-green-600" : "bg-blue-600"} text-white`}
-              disabled={isLoading}
-            >
-              {isLoading ? "Verifying..." : isVerified ? "Verified ✔️" : "Verify OTP"}
-            </button>
-          </>
-        )}
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="w-full p-2 border rounded mb-4 mt-4"
-          style={{ color: "black" }}
-        />
-        <button
-          onClick={handleSignup}
-          className="px-4 py-2 bg-green-600 text-white rounded w-full"
-          disabled={isLoading || !isVerified}
-        >
-          {isLoading ? "Signing Up..." : "Sign Up"}
-        </button>
+            <UserPlus size={40} className="text-white" />
+          </motion.div>
+          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-slate-400">Join the best chat community</p>
+        </div>
 
-        <p className="mt-4 text-center" style={{ color: "black" }}>
-          Already have an account? <a href="/" className="text-blue-600">Log In</a>
-        </p>
-      </div>
+        <div className="glass-panel p-8 rounded-3xl shadow-2xl border border-white/10">
+          <form onSubmit={handleSignup} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Full Name</label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                <input 
+                  type="text" 
+                  name="userName"
+                  value={userData.userName}
+                  onChange={handleInput}
+                  placeholder="John Doe"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Email Address</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                <input 
+                  type="email" 
+                  name="email"
+                  value={userData.email}
+                  onChange={handleInput}
+                  placeholder="name@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                <input 
+                  type="password" 
+                  name="password"
+                  value={userData.password}
+                  onChange={handleInput}
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              disabled={loading}
+              className={`
+                w-full py-4 rounded-2xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2
+                ${loading ? "bg-indigo-600/50 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30"}
+              `}
+            >
+              {loading ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <>Get Started <ArrowRight size={20} /></>
+              )}
+            </button>
+          </form>
+
+          <p className="text-center mt-8 text-slate-400 text-sm">
+            Already have an account?{" "}
+            <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">Sign In</Link>
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 };
+
 export default Signup;

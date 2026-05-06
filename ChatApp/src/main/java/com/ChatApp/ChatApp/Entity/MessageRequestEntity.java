@@ -11,8 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MessageRequestEntity {
 	
-	 private String content;
-	    private String sender;
-	    private String roomId;
-
+    private String content;
+    private String sender;
+    private String roomId;
+    
+    // File attachment fields
+    private String fileUrl;
+    private String fileName;
+    private String fileType;
 }
