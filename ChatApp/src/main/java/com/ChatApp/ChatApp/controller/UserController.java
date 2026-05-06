@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequestMapping("/user")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 public class UserController {
 	
 	@Autowired

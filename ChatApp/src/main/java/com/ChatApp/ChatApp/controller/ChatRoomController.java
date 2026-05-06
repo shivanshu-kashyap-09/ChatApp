@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/chat-room")
 @Slf4j
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 public class ChatRoomController {
 	
 	@Autowired
