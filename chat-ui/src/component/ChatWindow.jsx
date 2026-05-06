@@ -9,6 +9,8 @@ import JoinCreateChat from "./JoinCreateChat";
 import axios from "axios";
 import { timeAgo } from "../Config/Helper";
 import chatIcon from "../assets/chat.png";
+import API_BASE_URL from "../config";
+
 
 const ChatWindow = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +44,8 @@ const ChatWindow = () => {
   const handleLogoutRoom = async () => {
     try {
       const response = await axios.post(
-        `http://tomcat.localhost:8080/chat-room/remove-room/${userName}`,
+        `${API_BASE_URL}/chat-room/remove-room/${userName}`,
+
         selectedRoom.roomId,
         {
           headers: {
@@ -70,7 +73,7 @@ const ChatWindow = () => {
       try {
         const email = localStorage.getItem("loginEmail");
         const response = await axios.get(
-          `http://tomcat.localhost:8080/chat-room/room-list/${email}`
+          `${API_BASE_URL}/chat-room/room-list/${email}`
         );
         setRooms(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
@@ -87,7 +90,7 @@ const ChatWindow = () => {
       const fetchMessages = async () => {
         try {
           const response = await axios.get(
-            `http://tomcat.localhost:8080/chat-room/message/${selectedRoom.roomId}`
+            `${API_BASE_URL}/chat-room/message/${selectedRoom.roomId}`
           );
           setMessages(response.data || []);
         } catch (error) {
@@ -102,7 +105,7 @@ const ChatWindow = () => {
   // WebSocket connection and subscription
   useEffect(() => {
     if (selectedRoom && currentUser) {
-      const client = Stomp.over(() => new SockJS("http://tomcat.localhost:8080/chat"));
+      const client = Stomp.over(() => new SockJS(`${API_BASE_URL}/chat`));
 
       client.connect(
         {},
@@ -165,7 +168,8 @@ const ChatWindow = () => {
   return (
     <div className="flex flex-col sm:flex-row h-screen">
       {/* Left Sidebar */}
-      <div className="sm:w-1/3 w-full bg-gray-900 text-white flex flex-col">
+      <div className={`${showRooms ? 'flex' : 'hidden'} sm:flex sm:w-1/3 md:w-1/4 w-full bg-gray-900 text-white flex-col h-full border-r border-gray-800`}>
+
         <div className="flex flex-row items-center justify-between p-2 sm:p-4">
           <img src={chatIcon} className="w-14 sm:w-10" alt="Chat Icon" />
           <h1 className="text-l md:text-2xl font-bold sm:pr-4">ChatApp</h1>
@@ -184,13 +188,14 @@ const ChatWindow = () => {
           </div>
         </div>
 
-        {/* Show/Hide Rooms Button */}
         <button
-          className="bg-blue-600 px-4 py-3 w-full md:hidden text-left font-bold text-lg"
-          onClick={() => setShowRooms(!showRooms)}
+          className="bg-blue-600 px-4 py-3 w-full sm:hidden text-left font-bold text-lg flex items-center justify-between"
+          onClick={() => setShowRooms(false)}
         >
-          <FaBars className="inline mr-2" /> {showRooms ? "Hide Rooms" : "Show Rooms"}
+          <span><FaBars className="inline mr-2" /> Hide Rooms</span>
+          <span className="text-sm bg-blue-700 px-2 py-1 rounded">Close</span>
         </button>
+
 
         {/* Room List */}
         {showRooms && (
@@ -219,14 +224,22 @@ const ChatWindow = () => {
       </div>
 
       {/* Main Chat Display */}
-      <div className="sm:w-2/3 w-full bg-gray-700 flex flex-col">
+      <div className={`${!showRooms ? 'flex' : 'hidden'} sm:flex sm:w-2/3 md:w-3/4 w-full bg-gray-700 flex-col h-full`}>
+
         {selectedRoom ? (
           <>
             {/* Chat Header */}
             <header className="w-full h-[65px] py-5 bg-gray-900 shadow flex justify-between items-center px-4 sticky top-0 z-10">
-              <h1 className="text-lg font-semibold">
-                User: <span>{userName}</span>
+              <h1 className="text-lg font-semibold flex items-center gap-2">
+                <button 
+                  className="sm:hidden bg-blue-600 p-2 rounded"
+                  onClick={() => setShowRooms(true)}
+                >
+                  <FaBars />
+                </button>
+                <span className="hidden xs:inline">User:</span> <span>{userName}</span>
               </h1>
+
               <h2 className="font-bold">
                 Room: <span>{selectedRoom.roomId}</span>
               </h2>
@@ -294,9 +307,16 @@ const ChatWindow = () => {
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center flex-1 text-gray-400">
-            Select a room to start messaging...
+          <div className="flex flex-col items-center justify-center flex-1 text-gray-400 gap-4 p-4 text-center">
+            <p>Select a room to start messaging...</p>
+            <button 
+              className="sm:hidden bg-blue-600 text-white px-6 py-2 rounded-full font-bold"
+              onClick={() => setShowRooms(true)}
+            >
+              Show Room List
+            </button>
           </div>
+
         )}
       </div>
 

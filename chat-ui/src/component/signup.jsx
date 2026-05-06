@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import API_BASE_URL from "../config";
+
 import toast from "react-hot-toast";
 import chatIcon from "../assets/chat.png";
 
@@ -21,7 +23,7 @@ const Signup = () => {
     }
     setIsLoading(true);
     try {
-      const response = await axios.post("http://tomcat.localhost:8080/user/generate-otp", { email});
+      const response = await axios.post(`${API_BASE_URL}/user/generate-otp`, { email});
       if (response.status === 200) {
         setIsOtpSent(true);
         toast.success("OTP sent to your email. Please check and verify.");
@@ -41,7 +43,7 @@ const Signup = () => {
     }
     setIsLoading(true);
     try {
-      const response = await axios.post("http://tomcat.localhost:8080/user/verify", { email, otp });
+      const response = await axios.post(`${API_BASE_URL}/user/verify`, { email, otp });
       if (response.status === 200) {
         setIsVerified(true);
         toast.success("Email verified successfully!");
@@ -68,7 +70,7 @@ const Signup = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post("http://tomcat.localhost:8080/user/signup", {
+      const response = await axios.post(`${API_BASE_URL}/user/signup`, {
         userName,
         email,
         password,
@@ -89,8 +91,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 to-blue-500">
-      <div className="p-6 bg-white rounded shadow-lg w-80">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
+      <div className="p-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md">
+
         <img src={chatIcon} className="w-14 mx-auto mb-[10px]" />
 
         <input

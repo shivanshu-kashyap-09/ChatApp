@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import useChatContext from "../Context/ChatContext";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import API_BASE_URL from "../config";
+
 
 const JoinCreateChat = () => {
   const loginUserName = localStorage.getItem("loginUserName");
@@ -28,7 +30,8 @@ const JoinCreateChat = () => {
   
     try {
       const response = await axios.post(
-        `http://tomcat.localhost:8080/chat-room/join-room/${loginUserName}`,
+        `${API_BASE_URL}/chat-room/join-room/${loginUserName}`,
+
         { roomId: detail.roomId }
       );
   
@@ -61,7 +64,7 @@ const JoinCreateChat = () => {
     }
   
     try {
-      const response = await axios.post(`http://tomcat.localhost:8080/chat-room/create-room/${loginUserName}`, {
+      const response = await axios.post(`${API_BASE_URL}/chat-room/create-room/${loginUserName}`, {
         roomId: detail.roomId,
         userName: detail.userName, 
       });
@@ -80,8 +83,9 @@ const JoinCreateChat = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center ">
-      <div className="p-10 dark:border-gray-700 border w-full flex flex-col gap-5 max-w-md rounded dark:bg-gray-900 shadow">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="p-6 sm:p-10 dark:border-gray-700 border w-full flex flex-col gap-5 max-w-md rounded-2xl dark:bg-gray-900 shadow-2xl">
+
         <div>
           <img src={chatIcon} className="w-24 mx-auto" />
         </div>

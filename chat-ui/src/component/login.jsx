@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import API_BASE_URL from "../config";
+
 import chatIcon from "../assets/chat.png";
 import toast from "react-hot-toast";
 
@@ -22,7 +24,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8080/user/login", {
+      const response = await axios.post(`${API_BASE_URL}/user/login`, {
         email,
         password,
       });
@@ -45,8 +47,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 to-blue-500">
-      <div className="p-6 bg-white rounded-lg shadow-xl w-96">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
+      <div className="p-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md">
+
         <img src={chatIcon} className="w-14 mx-auto mb-[10px]" />
         {error && (
           <div className="mb-4 bg-red-100 text-red-700 px-4 py-2 rounded">
