@@ -112,4 +112,8 @@ public class UserService {
 	public UserEntity getByEmail(String email) {
 		return userRepository.getByEmail(email);
 	}
+
+	public java.util.List<UserEntity> findAll() {
+		return userRepository.findAll();
+	}
 }

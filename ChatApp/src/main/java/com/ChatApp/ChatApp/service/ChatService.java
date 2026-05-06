@@ -19,9 +19,12 @@ public class ChatService {
 
     @Autowired
     private ChatRoomRepository chatRoomRepository;
-    
-//    @Autowired
-//    private MessageEntity messageEntity;
+
+    @Autowired
+    private PushNotificationService pushNotificationService;
+
+    @Autowired
+    private UserService userService;
 
     public MessageEntity sendMessage(String roomId, MessageRequestEntity request) {
         try {
@@ -43,6 +46,22 @@ public class ChatService {
             }
             
             chatRoomRepository.save(room);
+
+            // Notify users in the room
+            String senderName = request.getSender();
+            String content = request.getContent();
+            
+            // Find users who have this room and notify them (excluding sender)
+            userService.findAll().stream()
+                .filter(user -> user.getChatRoom().stream().anyMatch(r -> r.getRoomId().equals(roomId)))
+                .filter(user -> !user.getUserName().equals(senderName))
+                .forEach(user -> {
+                    pushNotificationService.sendNotification(
+                        user.getEmail(), 
+                        "New Message from " + senderName, 
+                        content.length() > 50 ? content.substring(0, 47) + "..." : content
+                    );
+                });
 
             return messageEntity;
         } catch (Exception e) {

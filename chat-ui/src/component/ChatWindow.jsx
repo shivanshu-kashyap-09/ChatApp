@@ -10,6 +10,7 @@ import axios from "axios";
 import { timeAgo } from "../Config/Helper";
 import chatIcon from "../assets/chat.png";
 import API_BASE_URL from "../config";
+import { subscribeToNotifications } from "../Config/notification";
 
 
 const ChatWindow = () => {
@@ -137,6 +138,13 @@ const ChatWindow = () => {
       };
     }
   }, [selectedRoom, currentUser]);
+
+  // Subscribe to push notifications
+  useEffect(() => {
+    if (currentUser) {
+      subscribeToNotifications();
+    }
+  }, [currentUser]);
 
   // Scroll to the bottom of the chat on new messages
   useEffect(() => {
